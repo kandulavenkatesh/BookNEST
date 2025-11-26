@@ -20,6 +20,11 @@ app.get("/", function(req, res) {
     res.render("home");
 });
 
+// Create a route for login
+app.get("/login", function(req, res) {
+    res.render("login");
+});
+
 // Create a route for testing the db
 app.get("/db_test", function(req, res) {
     // Assumes a table called test_table exists in your database
