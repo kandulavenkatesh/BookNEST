@@ -1,0 +1,78 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+    title Home - BookNEST
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css", integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN", crossorigin="anonymous")
+    style.
+      body { background: #f5f7fb; min-height: 100vh; }
+      .hero { background: linear-gradient(120deg, #0d6efd, #6f42c1); color: #fff; border-radius: 18px; }
+      .card-soft { border: none; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+      .badge-soft { background: rgba(13,110,253,0.12); color: #0d6efd; border-radius: 999px; padding: 6px 12px; font-weight: 600; }
+      .muted { color: #6c757d; }
+      .footer { color: #6c757d; }
+  body
+    main.container.py-5
+      .hero.p-5.mb-5
+        .row.align-items-center.g-4
+          .col-lg-8
+            span.badge-soft.mb-3.d-inline-block Fresh reads weekly
+            h1.display-4.fw-bold.mb-3 BookNEST — Your Digital Library
+            p.lead.mb-4 Explore, borrow, and enjoy thousands of books online with personalized shelves and a friendly community.
+            .d-flex.flex-wrap.gap-3
+              a.btn.btn-light.btn-lg.text-primary.fw-semibold(href="#features") Explore Books
+              a.btn.btn-outline-light.btn-lg(href="/login") Login
+              a.btn.btn-warning.btn-lg.text-dark(href="/register") Registration
+          .col-lg-4.text-lg-end.text-center
+            img.img-fluid.rounded.shadow(src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80", alt="Library")
+      .row.g-4#features
+        .col-lg-8
+          section.card-soft.p-4.bg-white
+            h2.fw-bold.mb-3 Welcome to BookNEST
+            p.mb-3 Dive into curated collections, manage your personal bookshelf, and discover new reads tailored to your taste.
+            .row.g-3
+              .col-md-6
+                .card.card-soft.h-100
+                  .card-body
+                    .badge-soft.mb-2 Borrow & Read
+                    h5.card-title Instant access everywhere
+                    p.card-text Borrow instantly and read with seamless syncing across devices.
+              .col-md-6
+                .card.card-soft.h-100
+                  .card-body
+                    .badge-soft.mb-2 Your Shelf
+                    h5.card-title Organize your world
+                    p.card-text Track progress, highlights, and must-reads in one place.
+              .col-md-6
+                .card.card-soft.h-100
+                  .card-body
+                    .badge-soft.mb-2 Community Reviews
+                    h5.card-title Trusted insights
+                    p.card-text See what fellow readers think before you dive in.
+              .col-md-6
+                .card.card-soft.h-100
+                  .card-body
+                    .badge-soft.mb-2 Offline Ready
+                    h5.card-title Read anywhere
+                    p.card-text Take books offline so you never lose your place, even on the go.
+        .col-lg-4
+          section.card-soft.p-4.bg-white#about
+            h2.fw-bold.mb-3 About Us
+            p.mb-3 BookNEST is built for curious readers. We blend a curated catalog with friendly tools so you can discover, save, and enjoy books effortlessly.
+            ul.list-unstyled.muted.mb-0
+              li.mb-2 ✔ 120k+ titles and journals
+              li.mb-2 ✔ Borrow online with device sync
+              li.mb-2 ✔ Spaces for clubs, highlights, and notes
+              li ✔ Responsive support that listens
+      .row.g-4.mt-1
+        .col-lg-8
+          section.card-soft.p-4.bg-white#contact
+            h2.fw-bold.mb-3 Contact Us
+            p.mb-2 Have questions or need support? We are here to help.
+            p.mb-1 📧 Email: support@booknest.com
+            p.mb-1 📞 Phone: +91 98765 43210
+            p.mb-0 🏢 Address: BookNEST, Digital Library Center, India
+    footer.text-center.py-4.mt-5
+      small.footer © 2025 BookNEST Digital Library. All Rights Reserved.
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js", integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL", crossorigin="anonymous")
