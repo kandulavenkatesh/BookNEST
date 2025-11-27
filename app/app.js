@@ -33,7 +33,26 @@ app.get("/register", function(req, res) {
 // Create a route for dashboard
 app.get("/dashboard", async function(req, res) {
     try {
-        const [recentBooks, statsRows, categoryRows] = await Promise.all([
+        const search = (req.query.search || '').trim();
+        const categoryFilter = req.query.category ? Number(req.query.category) : null;
+
+        const whereClauses = [];
+        const params = [];
+
+        if (search) {
+            whereClauses.push(`(b.title LIKE ? OR a.name LIKE ? OR b.isbn_13 LIKE ? OR b.isbn_10 LIKE ?)`);
+            const like = `%${search}%`;
+            params.push(like, like, like, like);
+        }
+
+        if (categoryFilter) {
+            whereClauses.push(`c_filter.id = ?`);
+            params.push(categoryFilter);
+        }
+
+        const whereSql = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+        const [recentBooks, statsRows, categoryRows, allCategories] = await Promise.all([
             db.query(`
                 SELECT
                     b.id,
@@ -47,10 +66,12 @@ app.get("/dashboard", async function(req, res) {
                 JOIN authors a ON b.author_id = a.id
                 LEFT JOIN book_categories bc ON bc.book_id = b.id
                 LEFT JOIN categories c ON c.id = bc.category_id
+                ${categoryFilter ? 'LEFT JOIN book_categories bc_filter ON bc_filter.book_id = b.id LEFT JOIN categories c_filter ON c_filter.id = bc_filter.category_id' : ''}
+                ${whereSql}
                 GROUP BY b.id
                 ORDER BY b.created_at DESC
-                LIMIT 5;
-            `),
+                LIMIT 20;
+            `, params),
             db.query(`
                 SELECT
                     (SELECT COUNT(*) FROM books) AS books,
@@ -67,13 +88,16 @@ app.get("/dashboard", async function(req, res) {
                 GROUP BY c.id
                 ORDER BY total DESC, c.name ASC
                 LIMIT 5;
-            `)
+            `),
+            db.query(`SELECT id, name FROM categories ORDER BY name ASC;`)
         ]);
 
         res.render("dashboard", {
             books: recentBooks,
             stats: statsRows[0] || {},
-            categoryStats: categoryRows
+            categoryStats: categoryRows,
+            filters: { search, category: categoryFilter },
+            allCategories
         });
     } catch (err) {
         console.error("Error loading dashboard", err);

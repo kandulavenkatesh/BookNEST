@@ -83,7 +83,6 @@ html(lang="en")
           .pill Dashboard
           h1.h4.mb-0.fw-bold BookNEST Command Center
         .d-flex.align-items-center.gap-3
-          .pill-emerald.small Live
           a.btn.btn-dark.rounded-pill(href="/") Home
           a.btn.btn-outline-primary.rounded-pill(href="/login") Sign out
 
@@ -92,7 +91,6 @@ html(lang="en")
           .metric.p-4
             .d-flex.justify-content-between.align-items-center.mb-2
               span.text-muted.small Total Books
-              span.pill-amber.small Updated
             .value #{stats && stats.books || 0}
             .trend.text-success.mt-1 Library size
             .chart-bar.mt-3
@@ -101,7 +99,6 @@ html(lang="en")
           .metric.p-4
             .d-flex.justify-content-between.align-items-center.mb-2
               span.text-muted.small Authors
-              span.pill-emerald.small ▲
             .value #{stats && stats.authors || 0}
             .trend.text-success.mt-1 Curated voices
             .chart-bar.mt-3
@@ -110,7 +107,6 @@ html(lang="en")
           .metric.p-4
             .d-flex.justify-content-between.align-items-center.mb-2
               span.text-muted.small Publishers
-              span.pill.small Live
             .value #{stats && stats.publishers || 0}
             .trend.text-primary.mt-1 Partners
             .chart-bar.mt-3
@@ -119,7 +115,6 @@ html(lang="en")
           .metric.p-4
             .d-flex.justify-content-between.align-items-center.mb-2
               span.text-muted.small Categories
-              span.pill-ink.small Today
             .value #{stats && stats.categories || 0}
             .trend.text-success.mt-1 Organized shelves
             .chart-bar.mt-3
@@ -131,10 +126,14 @@ html(lang="en")
             .d-flex.justify-content-between.align-items-center.mb-3
               .d-flex.align-items-center.gap-2
                 span.fw-bold.text-uppercase.small.text-muted Recent Books
-                if books && books.length
-                  span.badge.bg-primary-soft.text-primary.fw-semibold(style="background:rgba(14,165,233,0.12);") Live
-              if books && books.length
-                a.text-decoration-none.fw-semibold(href="#") View all →
+            form.d-flex.align-items-center.gap-2(method="get", action="/dashboard")
+              input.form-control(type="text", name="search", placeholder="Search title, author, ISBN", value=filters && filters.search || '')
+              select.form-select(name="category")
+                option(value="") All categories
+                if allCategories && allCategories.length
+                  each cat in allCategories
+                    option(value=cat.id, selected=filters && filters.category == cat.id) #{cat.name}
+              button.btn.btn-primary(type="submit") Filter
             table.table.align-middle.mb-0
               thead
                 tr.text-muted
