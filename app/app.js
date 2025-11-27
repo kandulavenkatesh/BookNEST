@@ -106,6 +106,72 @@ app.get("/dashboard", async function(req, res) {
     }
 });
 
+// Book details page
+app.get("/books/:id", async function(req, res) {
+    const bookId = Number(req.params.id);
+    if (!bookId) {
+        return res.status(400).send("Invalid book id");
+    }
+
+    try {
+        const [bookRows, categoryRows] = await Promise.all([
+            db.query(
+                `
+                SELECT
+                    b.id,
+                    b.title,
+                    b.subtitle,
+                    b.author_id,
+                    a.name AS author_name,
+                    b.publisher_id,
+                    p.name AS publisher_name,
+                    b.isbn_10,
+                    b.isbn_13,
+                    b.language,
+                    b.page_count,
+                    b.format,
+                    b.cover_image_url,
+                    b.description,
+                    DATE_FORMAT(b.publication_date, '%Y-%m-%d') AS publication_date_input,
+                    DATE_FORMAT(b.created_at, '%Y-%m-%d %H:%i') AS created_at,
+                    DATE_FORMAT(b.updated_at, '%Y-%m-%d %H:%i') AS updated_at
+                FROM books b
+                JOIN authors a ON a.id = b.author_id
+                LEFT JOIN publishers p ON p.id = b.publisher_id
+                WHERE b.id = ?
+                LIMIT 1;
+                `,
+                [bookId]
+            ),
+            db.query(
+                `
+                SELECT
+                    c.id,
+                    c.name,
+                    CASE WHEN bc.category_id IS NOT NULL THEN 1 ELSE 0 END AS selected
+                FROM categories c
+                LEFT JOIN book_categories bc ON bc.category_id = c.id AND bc.book_id = ?
+                ORDER BY c.name ASC;
+                `,
+                [bookId]
+            )
+        ]);
+
+        const book = bookRows[0];
+        if (!book) {
+            return res.status(404).send("Book not found");
+        }
+
+        res.render("book-detail", {
+            book,
+            categories: categoryRows
+        });
+    } catch (err) {
+        console.error("Error loading book details", err);
+        res.status(500).send("Unable to load book details right now.");
+    }
+});
+
 // Create a route for testing the db
 app.get("/db_test", function(req, res) {
     // Assumes a table called test_table exists in your database
