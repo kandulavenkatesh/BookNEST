@@ -30,6 +30,57 @@ app.get("/register", function(req, res) {
     res.render("register");
 });
 
+// Create a route for dashboard
+app.get("/dashboard", async function(req, res) {
+    try {
+        const [recentBooks, statsRows, categoryRows] = await Promise.all([
+            db.query(`
+                SELECT
+                    b.id,
+                    b.title,
+                    b.isbn_13,
+                    DATE_FORMAT(b.created_at, '%Y-%m-%d') AS added_on,
+                    COALESCE(DATE_FORMAT(b.publication_date, '%b %e, %Y'), '—') AS publication_date,
+                    a.name AS author,
+                    GROUP_CONCAT(DISTINCT c.name ORDER BY c.name SEPARATOR ', ') AS categories
+                FROM books b
+                JOIN authors a ON b.author_id = a.id
+                LEFT JOIN book_categories bc ON bc.book_id = b.id
+                LEFT JOIN categories c ON c.id = bc.category_id
+                GROUP BY b.id
+                ORDER BY b.created_at DESC
+                LIMIT 5;
+            `),
+            db.query(`
+                SELECT
+                    (SELECT COUNT(*) FROM books) AS books,
+                    (SELECT COUNT(*) FROM authors) AS authors,
+                    (SELECT COUNT(*) FROM publishers) AS publishers,
+                    (SELECT COUNT(*) FROM categories) AS categories
+            `),
+            db.query(`
+                SELECT
+                    c.name,
+                    COUNT(bc.book_id) AS total
+                FROM categories c
+                LEFT JOIN book_categories bc ON bc.category_id = c.id
+                GROUP BY c.id
+                ORDER BY total DESC, c.name ASC
+                LIMIT 5;
+            `)
+        ]);
+
+        res.render("dashboard", {
+            books: recentBooks,
+            stats: statsRows[0] || {},
+            categoryStats: categoryRows
+        });
+    } catch (err) {
+        console.error("Error loading dashboard", err);
+        res.status(500).send("Unable to load dashboard at this time.");
+    }
+});
+
 // Create a route for testing the db
 app.get("/db_test", function(req, res) {
     // Assumes a table called test_table exists in your database

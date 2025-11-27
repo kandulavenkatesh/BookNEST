@@ -1,0 +1,182 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+    title Dashboard - BookNEST
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin="anonymous")
+    link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap")
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css", integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN", crossorigin="anonymous")
+    style.
+      :root {
+        --ink: #0f172a;
+        --mist: #f1f5f9;
+        --teal: #0ea5e9;
+        --amber: #f59e0b;
+        --emerald: #10b981;
+        --slate: #334155;
+      }
+      body {
+        font-family: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+        background: radial-gradient(circle at 20% 20%, rgba(14,165,233,0.16), transparent 35%), radial-gradient(circle at 80% 0%, rgba(16,185,129,0.16), transparent 30%), #f8fafc;
+        color: var(--slate);
+      }
+      .nav-card {
+        border-radius: 18px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        box-shadow: 0 10px 40px rgba(15,23,42,0.05);
+      }
+      .pill {
+        background: rgba(14,165,233,0.12);
+        color: var(--teal);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-weight: 600;
+      }
+      .pill-amber { background: rgba(245,158,11,0.14); color: var(--amber); }
+      .pill-emerald { background: rgba(16,185,129,0.14); color: var(--emerald); }
+      .pill-ink { background: rgba(15,23,42,0.06); color: var(--ink); }
+      .metric {
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        background: linear-gradient(145deg, #fff, #f8fafc);
+        box-shadow: 0 12px 30px rgba(15,23,42,0.05);
+      }
+      .metric .value { font-size: 2rem; font-weight: 700; color: var(--ink); }
+      .metric .trend { font-weight: 600; }
+      .chart-bar {
+        height: 10px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        overflow: hidden;
+      }
+      .chart-bar span {
+        display: block;
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(120deg, var(--teal), var(--emerald));
+      }
+      .glass {
+        background: rgba(255,255,255,0.72);
+        border: 1px solid rgba(226,232,240,0.8);
+        border-radius: 16px;
+        box-shadow: 0 12px 28px rgba(15,23,42,0.08);
+        backdrop-filter: blur(4px);
+      }
+      table tr td, table tr th { vertical-align: middle; }
+      .badge-soft { border-radius: 999px; padding: 6px 10px; font-weight: 600; }
+      .list-dot::before {
+        content: '';
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: currentColor;
+        display: inline-block;
+        margin-right: 10px;
+        transform: translateY(1px);
+      }
+  body
+    .container-fluid.py-4.py-lg-5
+      .nav-card.p-4.mb-4.d-flex.flex-wrap.align-items-center.justify-content-between.gap-3
+        .d-flex.align-items-center.gap-3
+          .pill Dashboard
+          h1.h4.mb-0.fw-bold BookNEST Command Center
+        .d-flex.align-items-center.gap-3
+          .pill-emerald.small Live
+          a.btn.btn-dark.rounded-pill(href="/") Home
+          a.btn.btn-outline-primary.rounded-pill(href="/login") Sign out
+
+      .row.g-4
+        .col-md-6.col-xl-3
+          .metric.p-4
+            .d-flex.justify-content-between.align-items-center.mb-2
+              span.text-muted.small Total Books
+              span.pill-amber.small Updated
+            .value #{stats && stats.books || 0}
+            .trend.text-success.mt-1 Library size
+            .chart-bar.mt-3
+              span(style=`width:${Math.min((stats && stats.books || 0) / 50, 1) * 100}%`)
+        .col-md-6.col-xl-3
+          .metric.p-4
+            .d-flex.justify-content-between.align-items-center.mb-2
+              span.text-muted.small Authors
+              span.pill-emerald.small ▲
+            .value #{stats && stats.authors || 0}
+            .trend.text-success.mt-1 Curated voices
+            .chart-bar.mt-3
+              span(style=`width:${Math.min((stats && stats.authors || 0) / 10, 1) * 100}%`)
+        .col-md-6.col-xl-3
+          .metric.p-4
+            .d-flex.justify-content-between.align-items-center.mb-2
+              span.text-muted.small Publishers
+              span.pill.small Live
+            .value #{stats && stats.publishers || 0}
+            .trend.text-primary.mt-1 Partners
+            .chart-bar.mt-3
+              span(style=`width:${Math.min((stats && stats.publishers || 0) / 10, 1) * 100}%`)
+        .col-md-6.col-xl-3
+          .metric.p-4
+            .d-flex.justify-content-between.align-items-center.mb-2
+              span.text-muted.small Categories
+              span.pill-ink.small Today
+            .value #{stats && stats.categories || 0}
+            .trend.text-success.mt-1 Organized shelves
+            .chart-bar.mt-3
+              span(style=`width:${Math.min((stats && stats.categories || 0) / 10, 1) * 100}%`)
+
+      .row.g-4.mt-1
+        .col-lg-8
+          .glass.p-4
+            .d-flex.justify-content-between.align-items-center.mb-3
+              .d-flex.align-items-center.gap-2
+                span.fw-bold.text-uppercase.small.text-muted Recent Books
+                if books && books.length
+                  span.badge.bg-primary-soft.text-primary.fw-semibold(style="background:rgba(14,165,233,0.12);") Live
+              if books && books.length
+                a.text-decoration-none.fw-semibold(href="#") View all →
+            table.table.align-middle.mb-0
+              thead
+                tr.text-muted
+                  th(scope="col") Title
+                  th(scope="col") Author
+                  th(scope="col") Category
+                  th(scope="col") Added
+                  th(scope="col").text-end Status
+              tbody
+                if books && books.length
+                  each book in books
+                    tr
+                      td
+                        .fw-bold #{book.title}
+                        if book.isbn_13
+                          small.text-muted ISBN #{book.isbn_13}
+                      td #{book.author}
+                      td
+                        span.badge-soft(style="background:rgba(14,165,233,0.12);color:var(--teal);") #{book.categories || 'Uncategorized'}
+                      td.text-muted #{book.added_on || '—'}
+                      td.text-end
+                        span.badge-soft(style="background:rgba(16,185,129,0.14);color:var(--emerald);") In catalog
+                else
+                  tr
+                    td(colspan="5")
+                      .text-center.text-muted No books found. Add some titles to see them here.
+        .col-lg-4
+          .glass.p-4.mb-4
+            .d-flex.align-items-center.justify-content-between.mb-3
+              span.fw-bold.text-uppercase.small.text-muted Categories
+              if categoryStats && categoryStats.length
+                span.pill-ink.small #{categoryStats.length} shown
+            ul.list-unstyled.mb-0
+              if categoryStats && categoryStats.length
+                each cat in categoryStats
+                  li.mb-3.fw-semibold
+                    span.list-dot.text-primary
+                    | #{cat.name}
+                    span.float-end.text-muted #{cat.total} titles
+              else
+                li.fw-semibold.text-muted No categories yet.
+
+      .nav-card.mt-4.p-3.text-center.text-muted
+        small Crafted for curious readers — BookNEST Dashboard
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js", integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL", crossorigin="anonymous")
