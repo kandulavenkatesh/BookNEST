@@ -181,9 +181,9 @@ INSERT INTO `categories` (`name`) VALUES
 -- Seed data for books
 --
 INSERT INTO `books` (`title`, `subtitle`, `author_id`, `publisher_id`, `isbn_10`, `isbn_13`, `language`, `page_count`, `format`, `publication_date`, `description`, `cover_image_url`) VALUES
-('Kafka on the Shore', NULL, 1, 1, '1400079276', '9781400079278', 'English', 480, 'Paperback', '2005-01-03', 'A coming-of-age tale intertwining a runaway teen and an aging man who can talk to cats.', 'https://images.example.com/kafka-on-the-shore.jpg'),
-('Half of a Yellow Sun', NULL, 2, 2, '0007200285', '9780007200283', 'English', 448, 'Paperback', '2006-08-01', 'Story of love and war set during the Biafran War in Nigeria.', 'https://images.example.com/half-of-a-yellow-sun.jpg'),
-('Project Hail Mary', NULL, 3, 3, '0593135202', '9780593135204', 'English', 496, 'Hardcover', '2021-05-04', 'An astronaut wakes alone on a ship and must save Earth with the help of an unexpected ally.', 'https://images.example.com/project-hail-mary.jpg');
+('Kafka on the Shore', NULL, 1, 1, '1400079276', '9781400079278', 'English', 480, 'Paperback', '2005-01-03', 'A coming-of-age tale intertwining a runaway teen and an aging man who can talk to cats.', 'https://m.media-amazon.com/images/I/3190fsfp48L._SY445_SX342_ControlCacheEqualizer_.jpg'),
+('Half of a Yellow Sun', NULL, 2, 2, '0007200285', '9780007200283', 'English', 448, 'Paperback', '2006-08-01', 'Story of love and war set during the Biafran War in Nigeria.', 'https://d.gr-assets.com/books/1320400088l/1102116.jpg'),
+('Project Hail Mary', NULL, 3, 3, '0593135202', '9780593135204', 'English', 496, 'Hardcover', '2021-05-04', 'An astronaut wakes alone on a ship and must save Earth with the help of an unexpected ally.', 'https://m.media-amazon.com/images/I/51HLmk9ufLL._SY445_SX342_ControlCacheEqualizer_.jpg');
 
 --
 -- Seed data for book_categories

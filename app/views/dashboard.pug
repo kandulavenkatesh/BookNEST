@@ -137,6 +137,7 @@ html(lang="en")
             table.table.align-middle.mb-0
               thead
                 tr.text-muted
+                  th(scope="col") Cover
                   th(scope="col") Title
                   th(scope="col") Author
                   th(scope="col") Category
@@ -146,6 +147,8 @@ html(lang="en")
                 if books && books.length
                   each book in books
                     tr
+                      td
+                        img.rounded(style="width:56px;height:84px;object-fit:cover;box-shadow:0 6px 18px rgba(15,23,42,0.18);border:1px solid #e2e8f0;", src=book.cover_image_url || 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=200&q=80', alt=`Cover of ${book.title}`)
                       td
                         .fw-bold #{book.title}
                         if book.isbn_13

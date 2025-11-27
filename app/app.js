@@ -58,6 +58,7 @@ app.get("/dashboard", async function(req, res) {
                     b.id,
                     b.title,
                     b.isbn_13,
+                    b.cover_image_url,
                     DATE_FORMAT(b.created_at, '%Y-%m-%d') AS added_on,
                     COALESCE(DATE_FORMAT(b.publication_date, '%b %e, %Y'), '—') AS publication_date,
                     a.name AS author,
