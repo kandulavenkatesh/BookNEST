@@ -18,7 +18,7 @@ services:
     env_file:
       - ./.env
     ports:
-      - "3308:3306"
+      - "${MYSQL_PORT:-3306}:${DB_PORT}"
     volumes:
       - ./db:/var/lib/mysql
   phpmyadmin:
@@ -27,5 +27,10 @@ services:
     restart: always
     env_file:
       - ./.env
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: ${DB_CONTAINER}
+      PMA_PORT: ${DB_PORT}
     ports:
-      - "8081:80"
+      - "${PHPMYADMIN_PORT:-8081}:80"

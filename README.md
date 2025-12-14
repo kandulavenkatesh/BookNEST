@@ -17,7 +17,12 @@ Local files are mounted into the container using the 'volumes' directive in the 
 
 #### Visit phphmyadmin at:
 
-http://localhost:8081/
+http://localhost:8081/ (or whatever you set for `PHPMYADMIN_PORT`)
+
+MySQL is published on your host as well if you want to connect with a local client:
+
+- Host: `localhost`
+- Port: `3306` by default (use the value of `MYSQL_PORT` if you change it; container listens on `DB_PORT`, default `3306`)
 
 #### Visit your express app at:
 
