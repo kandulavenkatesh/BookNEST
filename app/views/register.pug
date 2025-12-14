@@ -39,27 +39,36 @@ html(lang="en")
               span.badge-soft Create account
             h1.h3.fw-bold.mb-3 Join BookNEST
             p.text-muted.mb-4 Discover curated books, save favorites, and sync across devices.
-            form(action="/register" method="post")
-              .row.g-3
-                .col-sm-6
-                  label.form-label(for="firstName") First name
-                  input#firstName.form-control(type="text", name="firstName", placeholder="First Name", required)
-                .col-sm-6
-                  label.form-label(for="lastName") Last name
-                  input#lastName.form-control(type="text", name="lastName", placeholder="Last Name", required)
+            form(action="/set-password" method="post")
+              .mb-3
+                label.form-label(for="username") Username
+                input#username.form-control(
+                  type="text",
+                  name="username",
+                  placeholder="Choose a username",
+                  required
+                )
+
               .mb-3
                 label.form-label(for="email") Email address
-                input#email.form-control(type="email", name="email", placeholder="email address", required)
+                input#email.form-control(
+                  type="email",
+                  name="email",
+                  placeholder="email@example.com",
+                  required
+                )
+
               .mb-3
                 label.form-label(for="password") Password
-                input#password.form-control(type="password", name="password", placeholder="Create a password", required)
-              .mb-3
-                label.form-label(for="confirm") Confirm password
-                input#confirm.form-control(type="password", name="confirm", placeholder="Re-enter password", required)
-              .form-check.mb-3
-                input#terms.form-check-input(type="checkbox", required)
-                label.form-check-label(for="terms") I agree to the terms and privacy policy
+                input#password.form-control(
+                  type="password",
+                  name="password",
+                  placeholder="Create a password",
+                  required
+                )
+
               button.btn.btn-primary.w-100.py-2(type="submit") Create account
+
             .mt-4.text-center
               span.text-muted Already have an account?
               | 

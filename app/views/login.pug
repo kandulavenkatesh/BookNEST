@@ -39,7 +39,7 @@ html(lang="en")
               span.badge-soft New
             h1.h3.fw-bold.mb-3 Welcome back
             p.text-muted.mb-4 Sign in to access your shelf, bookmarks, and recommendations.
-            form(action="/login" method="post")
+            form(action="/authenticate" method="post")
               .mb-3
                 label.form-label(for="email") Email address
                 input#email.form-control(type="email", name="email", placeholder="you@example.com", required)
