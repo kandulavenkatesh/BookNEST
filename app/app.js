@@ -19,16 +19,27 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static("static"));
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "static/uploads/books");
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + ext);
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  fileFilter: function (req, file, cb) {
+    if (file.mimetype === "application/pdf") {
+      cb(null, true);
+    } else {
+      cb(new Error("Only PDF files are allowed"), false);
+    }
+  }
+});
 
 
 
@@ -223,18 +234,18 @@ app.get("/hello/:name", function(req, res) {
 });
 
 
-app.post("/admin/books", upload.single("cover"), async function (req, res) {
-    try {
-        const bookModel = new Book();
-
-        await bookModel.addBook(req.body, req.file);
-
-        res.redirect("/dashboard");
-    } catch (err) {
-        console.error("Create book error:", err);
-        res.status(500).send("Failed to create book");
-    }
+app.post("/admin/books", upload.single("book_file"), async function (req, res) {
+  try {
+    const bookModel = new Book();
+    await bookModel.addBook(req.body, req.file);
+    res.redirect("/dashboard");
+  } catch (err) {
+    console.error("Create book error:", err);
+    res.status(500).send(err.message || "Failed to create book");
+  }
 });
+
+
 app.get("/admin/books/create", async function (req, res) {
     try {
         const authors = await db.query("SELECT id, name FROM authors");

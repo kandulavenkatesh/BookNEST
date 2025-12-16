@@ -151,6 +151,7 @@ class Book {
     };
   }
   // Add a new book
+  // Add a new book (with PDF upload)
   async addBook(bookData, file) {
     const {
       title,
@@ -172,20 +173,20 @@ class Book {
       throw new Error("Title and Author are required");
     }
 
-    // cover image (file has priority)
-    let coverImage = cover_image_url || null;
+    // PDF upload
+    let bookUpload = null;
     if (file) {
-      coverImage = `/uploads/books/${file.filename}`;
+      bookUpload = `/uploads/books/${file.filename}`;
     }
 
-    // insert book
     const result = await db.query(
       `
-        INSERT INTO books
-        (title, subtitle, author_id, publisher_id, isbn_10, isbn_13,
-         language, page_count, format, publication_date, description, cover_image_url)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `,
+    INSERT INTO books
+    (title, subtitle, author_id, publisher_id, isbn_10, isbn_13,
+     language, page_count, format, publication_date,
+     description, cover_image_url, book_upload)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
       [
         title,
         subtitle || null,
@@ -198,13 +199,14 @@ class Book {
         format || null,
         publication_date || null,
         description || null,
-        coverImage,
+        cover_image_url || null,
+        bookUpload,
       ]
     );
 
     const bookId = result.insertId;
 
-    // insert categories (many-to-many)
+    // categories
     if (categories) {
       const categoryArray = Array.isArray(categories)
         ? categories
@@ -221,7 +223,6 @@ class Book {
     return bookId;
   }
 
-  // Update book
   async updateBook(bookId, bookData, file) {
     const {
       title,
@@ -239,53 +240,57 @@ class Book {
       cover_image_url,
     } = bookData;
 
-    let coverImage = cover_image_url || null;
+    let bookUploadSql = "";
+    let params = [
+      title,
+      subtitle || null,
+      author_id,
+      publisher_id || null,
+      isbn_10 || null,
+      isbn_13 || null,
+      language || null,
+      page_count || null,
+      format || null,
+      publication_date || null,
+      description || null,
+      cover_image_url || null,
+    ];
+
     if (file) {
-      coverImage = `/uploads/books/${file.filename}`;
+      bookUploadSql = ", book_upload = ?";
+      params.push(`/uploads/books/${file.filename}`);
     }
+
+    params.push(bookId);
 
     await db.query(
       `
-        UPDATE books SET
-            title = ?,
-            subtitle = ?,
-            author_id = ?,
-            publisher_id = ?,
-            isbn_10 = ?,
-            isbn_13 = ?,
-            language = ?,
-            page_count = ?,
-            format = ?,
-            publication_date = ?,
-            description = ?,
-            cover_image_url = ?
-        WHERE id = ?
-        `,
-      [
-        title,
-        subtitle || null,
-        author_id,
-        publisher_id || null,
-        isbn_10 || null,
-        isbn_13 || null,
-        language || null,
-        page_count || null,
-        format || null,
-        publication_date || null,
-        description || null,
-        coverImage,
-        bookId,
-      ]
+    UPDATE books SET
+      title = ?,
+      subtitle = ?,
+      author_id = ?,
+      publisher_id = ?,
+      isbn_10 = ?,
+      isbn_13 = ?,
+      language = ?,
+      page_count = ?,
+      format = ?,
+      publication_date = ?,
+      description = ?,
+      cover_image_url = ?
+      ${bookUploadSql}
+    WHERE id = ?
+    `,
+      params
     );
 
-    // remove old categories
     await db.query("DELETE FROM book_categories WHERE book_id = ?", [bookId]);
 
-    // add new categories
     if (categories) {
       const categoryArray = Array.isArray(categories)
         ? categories
         : [categories];
+
       for (const catId of categoryArray) {
         await db.query(
           "INSERT INTO book_categories (book_id, category_id) VALUES (?, ?)",
@@ -296,6 +301,7 @@ class Book {
 
     return true;
   }
+
   // Delete book
   async deleteBook(bookId) {
     await db.query("DELETE FROM book_categories WHERE book_id = ?", [bookId]);

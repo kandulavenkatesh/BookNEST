@@ -133,8 +133,14 @@ html(lang="en")
               )
 
             .col-md-6
-              label.form-label Cover Image (Upload)
-              input.form-control(type="file" name="cover")
+                label.form-label Book PDF Upload
+                input.form-control(
+                    type="file"
+                    name="book_file"
+                    accept="application/pdf"
+                    required
+                )
+
 
             .col-md-6
               label.form-label Or Cover Image URL
