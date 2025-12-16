@@ -1,0 +1,151 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+    title Add Book – BookNEST
+
+    // Bootstrap
+    link(
+      rel="stylesheet",
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    )
+
+    style.
+      body {
+        background: linear-gradient(120deg, #f8fafc 0%, #eef2ff 50%, #f8fafc 100%);
+        font-family: 'Segoe UI', sans-serif;
+      }
+      .card-soft {
+        border-radius: 18px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 12px 30px rgba(15,23,42,0.08);
+      }
+      .pill {
+        background: rgba(13,110,253,0.12);
+        color: #0d6efd;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-weight: 600;
+      }
+
+  body
+    .container.py-5
+      .d-flex.justify-content-between.align-items-center.mb-4
+        .d-flex.align-items-center.gap-3
+          span.pill Admin
+          h1.h4.fw-bold.mb-0 Add New Book
+        a.btn.btn-outline-secondary.rounded-pill(href="/dashboard") ← Back to Dashboard
+
+      .card.card-soft.p-4
+        form(
+          action="/admin/books"
+          method="post"
+          enctype="multipart/form-data"
+        )
+
+          .row.g-3
+            .col-md-8
+              label.form-label Title
+              input.form-control(
+                type="text"
+                name="title"
+                placeholder="Book title"
+                required
+              )
+
+            .col-md-4
+              label.form-label Subtitle
+              input.form-control(
+                type="text"
+                name="subtitle"
+                placeholder="Optional subtitle"
+              )
+
+            .col-md-6
+              label.form-label Author
+              select.form-select(name="author_id" required)
+                option(value="") Select author
+                if authors
+                  each author in authors
+                    option(value=author.id)= author.name
+
+            .col-md-6
+              label.form-label Publisher
+              select.form-select(name="publisher_id")
+                option(value="") Select publisher
+                if publishers
+                  each pub in publishers
+                    option(value=pub.id)= pub.name
+
+            .col-md-4
+              label.form-label ISBN-10
+              input.form-control(type="text" name="isbn_10")
+
+            .col-md-4
+              label.form-label ISBN-13
+              input.form-control(type="text" name="isbn_13")
+
+            .col-md-4
+              label.form-label Language
+              input.form-control(
+                type="text"
+                name="language"
+                placeholder="English"
+              )
+
+            .col-md-4
+              label.form-label Page Count
+              input.form-control(type="number" name="page_count")
+
+            .col-md-4
+              label.form-label Format
+              select.form-select(name="format")
+                option(value="") Select format
+                option Paperback
+                option Hardcover
+                option Ebook
+
+            .col-md-4
+              label.form-label Publication Date
+              input.form-control(type="date" name="publication_date")
+
+            .col-md-12
+              label.form-label Categories
+              .d-flex.flex-wrap.gap-3
+                if categories
+                  each cat in categories
+                    .form-check
+                      input.form-check-input(
+                        type="checkbox"
+                        name="categories[]"
+                        value=cat.id
+                        id=`cat-${cat.id}`
+                      )
+                      label.form-check-label(for=`cat-${cat.id}`)= cat.name
+
+            .col-md-12
+              label.form-label Description
+              textarea.form-control(
+                rows="4"
+                name="description"
+                placeholder="Book description"
+              )
+
+            .col-md-6
+              label.form-label Cover Image (Upload)
+              input.form-control(type="file" name="cover")
+
+            .col-md-6
+              label.form-label Or Cover Image URL
+              input.form-control(
+                type="url"
+                name="cover_image_url"
+                placeholder="https://example.com/book.jpg"
+              )
+
+          .d-flex.justify-content-end.mt-4.gap-2
+            button.btn.btn-outline-secondary(type="reset") Reset
+            button.btn.btn-primary(type="submit") Save Book
+
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js")

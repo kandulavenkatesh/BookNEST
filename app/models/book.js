@@ -145,6 +145,77 @@ class Book {
             categories: categoryRows,
         };
     }
+    // Add a new book
+async addBook(bookData, file) {
+    const {
+        title,
+        subtitle,
+        author_id,
+        publisher_id,
+        isbn_10,
+        isbn_13,
+        language,
+        page_count,
+        format,
+        publication_date,
+        description,
+        categories,
+        cover_image_url
+    } = bookData;
+
+    if (!title || !author_id) {
+        throw new Error("Title and Author are required");
+    }
+
+    // cover image (file has priority)
+    let coverImage = cover_image_url || null;
+    if (file) {
+        coverImage = `/uploads/books/${file.filename}`;
+    }
+
+    // insert book
+    const result = await db.query(
+        `
+        INSERT INTO books
+        (title, subtitle, author_id, publisher_id, isbn_10, isbn_13,
+         language, page_count, format, publication_date, description, cover_image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        [
+            title,
+            subtitle || null,
+            author_id,
+            publisher_id || null,
+            isbn_10 || null,
+            isbn_13 || null,
+            language || null,
+            page_count || null,
+            format || null,
+            publication_date || null,
+            description || null,
+            coverImage
+        ]
+    );
+
+    const bookId = result.insertId;
+
+    // insert categories (many-to-many)
+    if (categories) {
+        const categoryArray = Array.isArray(categories)
+            ? categories
+            : [categories];
+
+        for (const catId of categoryArray) {
+            await db.query(
+                "INSERT INTO book_categories (book_id, category_id) VALUES (?, ?)",
+                [bookId, catId]
+            );
+        }
+    }
+
+    return bookId;
+}
+
 }
 
 module.exports = {

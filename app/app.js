@@ -6,6 +6,8 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const { User } = require("./models/user");
 const bcrypt = require("bcryptjs");
+const multer = require("multer");
+
 
 // Create express app
 var app = express();
@@ -17,6 +19,17 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static("static"));
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "static/uploads/books");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
+});
+
+const upload = multer({ storage });
+
 
 
 // Configure Pug templates
@@ -185,6 +198,37 @@ app.get("/hello/:name", function(req, res) {
     //  Retrieve the 'name' parameter and use it in a dynamically generated page
     res.send("Hello " + req.params.name);
 });
+
+
+app.post("/admin/books", upload.single("cover"), async function (req, res) {
+    try {
+        const bookModel = new Book();
+
+        await bookModel.addBook(req.body, req.file);
+
+        res.redirect("/dashboard");
+    } catch (err) {
+        console.error("Create book error:", err);
+        res.status(500).send("Failed to create book");
+    }
+});
+app.get("/admin/books/create", async function (req, res) {
+    try {
+        const authors = await db.query("SELECT id, name FROM authors");
+        const publishers = await db.query("SELECT id, name FROM publishers");
+        const categories = await db.query("SELECT id, name FROM categories");
+
+        res.render("add-book", {
+            authors,
+            publishers,
+            categories
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Unable to load page");
+    }
+});
+
 
 // Start server on port 3000
 app.listen(3000,function(){
