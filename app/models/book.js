@@ -2,41 +2,46 @@
 const db = require("../services/db");
 
 class Book {
-    // Id of the book (optional, used for detail lookups)
-    id;
-    // Optional search text for dashboard queries
-    search;
-    // Optional category filter for dashboard queries
-    categoryId;
+  // Id of the book (optional, used for detail lookups)
+  id;
+  // Optional search text for dashboard queries
+  search;
+  // Optional category filter for dashboard queries
+  categoryId;
 
-    constructor({ id = null, search = "", categoryId = null } = {}) {
-        this.id = id;
-        this.search = search;
-        this.categoryId = categoryId;
+  constructor({ id = null, search = "", categoryId = null } = {}) {
+    this.id = id;
+    this.search = search;
+    this.categoryId = categoryId;
+  }
+
+  // Dashboard listing data
+  async getDashboardData(search = this.search, categoryId = this.categoryId) {
+    const whereClauses = [];
+    const params = [];
+    const trimmedSearch = search.trim();
+
+    if (trimmedSearch) {
+      const like = `%${trimmedSearch}%`;
+      whereClauses.push(
+        "(b.title LIKE ? OR a.name LIKE ? OR b.isbn_13 LIKE ? OR b.isbn_10 LIKE ?)"
+      );
+      params.push(like, like, like, like);
     }
 
-    // Dashboard listing data
-    async getDashboardData(search = this.search, categoryId = this.categoryId) {
-        const whereClauses = [];
-        const params = [];
-        const trimmedSearch = search.trim();
+    if (categoryId) {
+      whereClauses.push("c_filter.id = ?");
+      params.push(Number(categoryId));
+    }
 
-        if (trimmedSearch) {
-            const like = `%${trimmedSearch}%`;
-            whereClauses.push("(b.title LIKE ? OR a.name LIKE ? OR b.isbn_13 LIKE ? OR b.isbn_10 LIKE ?)");
-            params.push(like, like, like, like);
-        }
+    const whereSql = whereClauses.length
+      ? `WHERE ${whereClauses.join(" AND ")}`
+      : "";
 
-        if (categoryId) {
-            whereClauses.push("c_filter.id = ?");
-            params.push(Number(categoryId));
-        }
-
-        const whereSql = whereClauses.length ? `WHERE ${whereClauses.join(" AND ")}` : "";
-
-        const [recentBooks, statsRows, categoryRows, allCategories] = await Promise.all([
-            db.query(
-                `
+    const [recentBooks, statsRows, categoryRows, allCategories] =
+      await Promise.all([
+        db.query(
+          `
                 SELECT
                     b.id,
                     b.title,
@@ -51,28 +56,28 @@ class Book {
                 LEFT JOIN book_categories bc ON bc.book_id = b.id
                 LEFT JOIN categories c ON c.id = bc.category_id
                 ${
-                    categoryId
-                        ? "LEFT JOIN book_categories bc_filter ON bc_filter.book_id = b.id LEFT JOIN categories c_filter ON c_filter.id = bc_filter.category_id"
-                        : ""
+                  categoryId
+                    ? "LEFT JOIN book_categories bc_filter ON bc_filter.book_id = b.id LEFT JOIN categories c_filter ON c_filter.id = bc_filter.category_id"
+                    : ""
                 }
                 ${whereSql}
                 GROUP BY b.id
                 ORDER BY b.created_at DESC
                 LIMIT 20;
             `,
-                params
-            ),
-            db.query(
-                `
+          params
+        ),
+        db.query(
+          `
                 SELECT
                     (SELECT COUNT(*) FROM books) AS books,
                     (SELECT COUNT(*) FROM authors) AS authors,
                     (SELECT COUNT(*) FROM publishers) AS publishers,
                     (SELECT COUNT(*) FROM categories) AS categories
                 `
-            ),
-            db.query(
-                `
+        ),
+        db.query(
+          `
                 SELECT
                     c.name,
                     COUNT(bc.book_id) AS total
@@ -82,24 +87,24 @@ class Book {
                 ORDER BY total DESC, c.name ASC
                 LIMIT 5;
                 `
-            ),
-            db.query(`SELECT id, name FROM categories ORDER BY name ASC;`),
-        ]);
+        ),
+        db.query(`SELECT id, name FROM categories ORDER BY name ASC;`),
+      ]);
 
-        return {
-            books: recentBooks,
-            stats: statsRows[0] || {},
-            categoryStats: categoryRows,
-            filters: { search: trimmedSearch, category: categoryId },
-            allCategories,
-        };
-    }
+    return {
+      books: recentBooks,
+      stats: statsRows[0] || {},
+      categoryStats: categoryRows,
+      filters: { search: trimmedSearch, category: categoryId },
+      allCategories,
+    };
+  }
 
-    // Book details data
-    async getBookDetail(bookId = this.id) {
-        const [bookRows, categoryRows] = await Promise.all([
-            db.query(
-                `
+  // Book details data
+  async getBookDetail(bookId = this.id) {
+    const [bookRows, categoryRows] = await Promise.all([
+      db.query(
+        `
                 SELECT
                     b.id,
                     b.title,
@@ -124,10 +129,10 @@ class Book {
                 WHERE b.id = ?
                 LIMIT 1;
                 `,
-                [bookId]
-            ),
-            db.query(
-                `
+        [bookId]
+      ),
+      db.query(
+        `
                 SELECT
                     c.id,
                     c.name,
@@ -136,88 +141,169 @@ class Book {
                 LEFT JOIN book_categories bc ON bc.category_id = c.id AND bc.book_id = ?
                 ORDER BY c.name ASC;
                 `,
-                [bookId]
-            ),
-        ]);
+        [bookId]
+      ),
+    ]);
 
-        return {
-            book: bookRows[0] || null,
-            categories: categoryRows,
-        };
-    }
-    // Add a new book
-async addBook(bookData, file) {
+    return {
+      book: bookRows[0] || null,
+      categories: categoryRows,
+    };
+  }
+  // Add a new book
+  async addBook(bookData, file) {
     const {
-        title,
-        subtitle,
-        author_id,
-        publisher_id,
-        isbn_10,
-        isbn_13,
-        language,
-        page_count,
-        format,
-        publication_date,
-        description,
-        categories,
-        cover_image_url
+      title,
+      subtitle,
+      author_id,
+      publisher_id,
+      isbn_10,
+      isbn_13,
+      language,
+      page_count,
+      format,
+      publication_date,
+      description,
+      categories,
+      cover_image_url,
     } = bookData;
 
     if (!title || !author_id) {
-        throw new Error("Title and Author are required");
+      throw new Error("Title and Author are required");
     }
 
     // cover image (file has priority)
     let coverImage = cover_image_url || null;
     if (file) {
-        coverImage = `/uploads/books/${file.filename}`;
+      coverImage = `/uploads/books/${file.filename}`;
     }
 
     // insert book
     const result = await db.query(
-        `
+      `
         INSERT INTO books
         (title, subtitle, author_id, publisher_id, isbn_10, isbn_13,
          language, page_count, format, publication_date, description, cover_image_url)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
-        [
-            title,
-            subtitle || null,
-            author_id,
-            publisher_id || null,
-            isbn_10 || null,
-            isbn_13 || null,
-            language || null,
-            page_count || null,
-            format || null,
-            publication_date || null,
-            description || null,
-            coverImage
-        ]
+      [
+        title,
+        subtitle || null,
+        author_id,
+        publisher_id || null,
+        isbn_10 || null,
+        isbn_13 || null,
+        language || null,
+        page_count || null,
+        format || null,
+        publication_date || null,
+        description || null,
+        coverImage,
+      ]
     );
 
     const bookId = result.insertId;
 
     // insert categories (many-to-many)
     if (categories) {
-        const categoryArray = Array.isArray(categories)
-            ? categories
-            : [categories];
+      const categoryArray = Array.isArray(categories)
+        ? categories
+        : [categories];
 
-        for (const catId of categoryArray) {
-            await db.query(
-                "INSERT INTO book_categories (book_id, category_id) VALUES (?, ?)",
-                [bookId, catId]
-            );
-        }
+      for (const catId of categoryArray) {
+        await db.query(
+          "INSERT INTO book_categories (book_id, category_id) VALUES (?, ?)",
+          [bookId, catId]
+        );
+      }
     }
 
     return bookId;
-}
+  }
 
+  // Update book
+  async updateBook(bookId, bookData, file) {
+    const {
+      title,
+      subtitle,
+      author_id,
+      publisher_id,
+      isbn_10,
+      isbn_13,
+      language,
+      page_count,
+      format,
+      publication_date,
+      description,
+      categories,
+      cover_image_url,
+    } = bookData;
+
+    let coverImage = cover_image_url || null;
+    if (file) {
+      coverImage = `/uploads/books/${file.filename}`;
+    }
+
+    await db.query(
+      `
+        UPDATE books SET
+            title = ?,
+            subtitle = ?,
+            author_id = ?,
+            publisher_id = ?,
+            isbn_10 = ?,
+            isbn_13 = ?,
+            language = ?,
+            page_count = ?,
+            format = ?,
+            publication_date = ?,
+            description = ?,
+            cover_image_url = ?
+        WHERE id = ?
+        `,
+      [
+        title,
+        subtitle || null,
+        author_id,
+        publisher_id || null,
+        isbn_10 || null,
+        isbn_13 || null,
+        language || null,
+        page_count || null,
+        format || null,
+        publication_date || null,
+        description || null,
+        coverImage,
+        bookId,
+      ]
+    );
+
+    // remove old categories
+    await db.query("DELETE FROM book_categories WHERE book_id = ?", [bookId]);
+
+    // add new categories
+    if (categories) {
+      const categoryArray = Array.isArray(categories)
+        ? categories
+        : [categories];
+      for (const catId of categoryArray) {
+        await db.query(
+          "INSERT INTO book_categories (book_id, category_id) VALUES (?, ?)",
+          [bookId, catId]
+        );
+      }
+    }
+
+    return true;
+  }
+  // Delete book
+  async deleteBook(bookId) {
+    await db.query("DELETE FROM book_categories WHERE book_id = ?", [bookId]);
+    await db.query("DELETE FROM books WHERE id = ?", [bookId]);
+    return true;
+  }
 }
 
 module.exports = {
-    Book,
+  Book,
 };

@@ -252,6 +252,42 @@ app.get("/admin/books/create", async function (req, res) {
     }
 });
 
+app.post("/admin/books/update/:id", upload.single("cover"), async function (req, res) {
+    if (!req.session.loggedIn || req.session.uid !== 1) {
+        return res.redirect("/login");
+    }
+
+    try {
+        const bookId = Number(req.params.id);
+        const bookModel = new Book();
+
+        await bookModel.updateBook(bookId, req.body, req.file);
+
+        res.redirect("/dashboard");
+    } catch (err) {
+        console.error("Update book error:", err);
+        res.status(500).send("Failed to update book");
+    }
+});
+app.get("/admin/books/delete/:id", async function (req, res) {
+    if (!req.session.loggedIn || req.session.uid !== 1) {
+        return res.redirect("/login");
+    }
+
+    try {
+        const bookId = Number(req.params.id);
+        const bookModel = new Book();
+
+        await bookModel.deleteBook(bookId);
+
+        res.redirect("/dashboard");
+    } catch (err) {
+        console.error("Delete book error:", err);
+        res.status(500).send("Failed to delete book");
+    }
+});
+
+
 
 // Start server on port 3000
 app.listen(3000,function(){
