@@ -57,6 +57,14 @@ const db = require('./services/db');
 const { Book } = require("./models/book");
 const bookModel = new Book();
 
+// Make session available in all pug files
+app.use((req, res, next) => {
+  res.locals.uid = req.session.uid;
+  res.locals.loggedIn = req.session.loggedIn;
+  next();
+});
+
+
 // Create a route for root - /
 app.get("/", function(req, res) {
     res.render("home");
@@ -104,12 +112,14 @@ app.post("/set-password", async (req, res) => {
 });
 
 // Handle login
+// Handle login
 app.post("/authenticate", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
     return res.status(400).send("Email and password are required.");
 
   const user = new User(email);
+
   try {
     const uId = await user.getIdFromEmail();
     if (!uId) return res.status(401).send("Invalid email");
@@ -118,15 +128,23 @@ app.post("/authenticate", async (req, res) => {
     const match = await user.authenticate(password);
     if (!match) return res.status(401).send("Invalid password");
 
-    // set session
+    // session
     req.session.uid = uId;
     req.session.loggedIn = true;
-    res.redirect("/");
+
+    // ✅ ROLE CHECK
+    if (uId === 1) {
+      return res.redirect("/dashboard");          // admin
+    } else {
+      return res.redirect("/customer-dashboard"); // customer
+    }
+
   } catch (err) {
     console.error("Error in /authenticate:", err);
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 // Handle logout
 app.get("/logout", (req, res) => {
@@ -138,6 +156,10 @@ app.get("/logout", (req, res) => {
 
 // Create a route for dashboard
 app.get("/dashboard", async function(req, res) {
+    if (!req.session.loggedIn || req.session.uid !== 1) {
+        return res.redirect("/login");
+    }
+
     try {
         const search = req.query.search || '';
         const categoryFilter = req.query.category ? Number(req.query.category) : null;
@@ -145,9 +167,10 @@ app.get("/dashboard", async function(req, res) {
         res.render("dashboard", dashboardData);
     } catch (err) {
         console.error("Error loading dashboard", err);
-        res.status(500).send("Unable to load dashboard at this time.");
+        res.status(500).send("Unable to load dashboard.");
     }
 });
+
 
 // Book details page
 app.get("/books/:id", async function(req, res) {
