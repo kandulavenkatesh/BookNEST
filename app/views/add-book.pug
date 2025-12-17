@@ -3,9 +3,8 @@ html(lang="en")
   head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1")
-    title Add Book – BookNEST
+    title= isEdit ? "Edit Book – BookNEST" : "Add Book – BookNEST"
 
-    // Bootstrap
     link(
       rel="stylesheet",
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -31,20 +30,25 @@ html(lang="en")
 
   body
     .container.py-5
+
+      // ===== HEADER =====
       .d-flex.justify-content-between.align-items-center.mb-4
         .d-flex.align-items-center.gap-3
           span.pill Admin
-          h1.h4.fw-bold.mb-0 Add New Book
+          h1.h4.fw-bold.mb-0= isEdit ? "Edit Book" : "Add New Book"
         a.btn.btn-outline-secondary.rounded-pill(href="/dashboard") ← Back to Dashboard
 
+      // ===== FORM CARD =====
       .card.card-soft.p-4
         form(
-          action="/admin/books"
+          action=isEdit ? `/admin/books/update/${book.id}` : "/admin/books"
           method="post"
           enctype="multipart/form-data"
         )
 
           .row.g-3
+
+            // ===== TITLE =====
             .col-md-8
               label.form-label Title
               input.form-control(
@@ -52,64 +56,107 @@ html(lang="en")
                 name="title"
                 placeholder="Book title"
                 required
+                value=book ? book.title : ""
               )
 
+            // ===== SUBTITLE =====
             .col-md-4
               label.form-label Subtitle
               input.form-control(
                 type="text"
                 name="subtitle"
                 placeholder="Optional subtitle"
+                value=book ? book.subtitle : ""
               )
 
+            // ===== AUTHOR =====
             .col-md-6
               label.form-label Author
               select.form-select(name="author_id" required)
                 option(value="") Select author
                 if authors
                   each author in authors
-                    option(value=author.id)= author.name
+                    option(
+                      value=author.id
+                      selected=book && book.author_id === author.id
+                    )= author.name
 
+            // ===== PUBLISHER =====
             .col-md-6
               label.form-label Publisher
               select.form-select(name="publisher_id")
                 option(value="") Select publisher
                 if publishers
                   each pub in publishers
-                    option(value=pub.id)= pub.name
+                    option(
+                      value=pub.id
+                      selected=book && book.publisher_id === pub.id
+                    )= pub.name
 
+            // ===== ISBN =====
             .col-md-4
               label.form-label ISBN-10
-              input.form-control(type="text" name="isbn_10")
+              input.form-control(
+                type="text"
+                name="isbn_10"
+                value=book ? book.isbn_10 : ""
+              )
 
             .col-md-4
               label.form-label ISBN-13
-              input.form-control(type="text" name="isbn_13")
+              input.form-control(
+                type="text"
+                name="isbn_13"
+                value=book ? book.isbn_13 : ""
+              )
 
+            // ===== LANGUAGE =====
             .col-md-4
               label.form-label Language
               input.form-control(
                 type="text"
                 name="language"
                 placeholder="English"
+                value=book ? book.language : ""
               )
 
+            // ===== PAGE COUNT =====
             .col-md-4
               label.form-label Page Count
-              input.form-control(type="number" name="page_count")
+              input.form-control(
+                type="number"
+                name="page_count"
+                value=book ? book.page_count : ""
+              )
 
+            // ===== FORMAT =====
             .col-md-4
               label.form-label Format
               select.form-select(name="format")
                 option(value="") Select format
-                option Paperback
-                option Hardcover
-                option Ebook
+                option(
+                  value="Paperback"
+                  selected=book && book.format === "Paperback"
+                ) Paperback
+                option(
+                  value="Hardcover"
+                  selected=book && book.format === "Hardcover"
+                ) Hardcover
+                option(
+                  value="Ebook"
+                  selected=book && book.format === "Ebook"
+                ) Ebook
 
+            // ===== PUBLICATION DATE =====
             .col-md-4
               label.form-label Publication Date
-              input.form-control(type="date" name="publication_date")
+              input.form-control(
+                type="date"
+                name="publication_date"
+                value=book ? book.publication_date_input : ""
+              )
 
+            // ===== CATEGORIES =====
             .col-md-12
               label.form-label Categories
               .d-flex.flex-wrap.gap-3
@@ -121,37 +168,44 @@ html(lang="en")
                         name="categories[]"
                         value=cat.id
                         id=`cat-${cat.id}`
+                        checked=!!cat.selected
                       )
                       label.form-check-label(for=`cat-${cat.id}`)= cat.name
 
+            // ===== DESCRIPTION =====
             .col-md-12
               label.form-label Description
               textarea.form-control(
                 rows="4"
                 name="description"
                 placeholder="Book description"
+              )= book ? book.description : ""
+
+            // ===== PDF UPLOAD =====
+            .col-md-6
+              label.form-label Book PDF Upload
+              input.form-control(
+                type="file"
+                name="book_file"
+                accept="application/pdf"
               )
+              if isEdit && book.book_upload
+                small.text-muted Existing PDF will be kept if not replaced
 
+            // ===== COVER IMAGE URL =====
             .col-md-6
-                label.form-label Book PDF Upload
-                input.form-control(
-                    type="file"
-                    name="book_file"
-                    accept="application/pdf"
-                    required
-                )
-
-
-            .col-md-6
-              label.form-label Or Cover Image URL
+              label.form-label Cover Image URL
               input.form-control(
                 type="url"
                 name="cover_image_url"
                 placeholder="https://example.com/book.jpg"
+                value=book ? book.cover_image_url : ""
               )
 
+          // ===== ACTIONS =====
           .d-flex.justify-content-end.mt-4.gap-2
             button.btn.btn-outline-secondary(type="reset") Reset
-            button.btn.btn-primary(type="submit") Save Book
+            button.btn.btn-primary(type="submit")
+              = isEdit ? "Update Book" : "Save Book"
 
     script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js")

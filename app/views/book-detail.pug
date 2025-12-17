@@ -43,9 +43,21 @@ html(lang="en")
         .d-flex.align-items-center.gap-3
           span.label-pill Details
           h1.h4.fw-bold.mb-0 #{book.title}
-        .d-flex.gap-2
+
+        .d-flex.flex-wrap.gap-2
           a.btn.btn-outline-secondary.rounded-pill(href="/dashboard") ← Back to dashboard
           a.btn.btn-outline-primary.rounded-pill(href="/") Home
+
+          // ===== ADMIN ACTIONS =====
+          if uid === 1
+            a.btn.btn-warning.rounded-pill(
+              href=`/admin/books/update/${book.id}`
+            ) ✏️ Update
+
+            a.btn.btn-danger.rounded-pill(
+              href=`/admin/books/delete/${book.id}`
+              onclick="return confirm('Are you sure you want to delete this book?')"
+            ) 🗑 Delete
 
       // ===== CONTENT =====
       .row.g-4

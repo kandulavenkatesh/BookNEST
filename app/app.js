@@ -262,6 +262,36 @@ app.get("/admin/books/create", async function (req, res) {
         res.status(500).send("Unable to load page");
     }
 });
+// ===== EDIT BOOK PAGE (GET) =====
+app.get("/admin/books/update/:id", async function (req, res) {
+  if (!req.session.loggedIn || req.session.uid !== 1) {
+    return res.redirect("/login");
+  }
+
+  try {
+    const bookId = Number(req.params.id);
+    const bookModel = new Book();
+
+    const { book, categories } = await bookModel.getBookDetail(bookId);
+    if (!book) {
+      return res.status(404).send("Book not found");
+    }
+
+    const authors = await db.query("SELECT id, name FROM authors");
+    const publishers = await db.query("SELECT id, name FROM publishers");
+
+    res.render("add-book", {
+      book,       
+      authors,
+      publishers,
+      categories,
+      isEdit: true 
+    });
+  } catch (err) {
+    console.error("Edit page error:", err);
+    res.status(500).send("Unable to load edit page");
+  }
+});
 
 app.post("/admin/books/update/:id", upload.single("cover"), async function (req, res) {
     if (!req.session.loggedIn || req.session.uid !== 1) {
