@@ -308,6 +308,50 @@ class Book {
     await db.query("DELETE FROM books WHERE id = ?", [bookId]);
     return true;
   }
+
+  async hasUserReviewed(bookId, userId) {
+    const rows = await db.query(
+      "SELECT id FROM reviews WHERE book_id = ? AND user_id = ? LIMIT 1",
+      [bookId, userId]
+    );
+    return rows.length > 0;
+  }
+
+  async getAverageRating(bookId) {
+    const rows = await db.query(
+      "SELECT AVG(rating) AS avgRating, COUNT(*) AS total FROM reviews WHERE book_id = ?",
+      [bookId]
+    );
+    return rows[0];
+  }
+  async updateReview(reviewId, userId, rating, comment) {
+    await db.query(
+      `
+    UPDATE reviews
+    SET rating = ?, comment = ?
+    WHERE id = ? AND user_id = ?
+    `,
+      [rating, comment, reviewId, userId]
+    );
+  }
+  async getReviews(bookId) {
+    return await db.query(
+      `
+    SELECT
+      r.id,
+      r.rating,
+      r.comment,
+      r.user_id,
+      u.username,
+      DATE_FORMAT(r.created_at, '%Y-%m-%d %H:%i') AS created_at
+    FROM reviews r
+    JOIN Users u ON u.user_id = r.user_id
+    WHERE r.book_id = ?
+    ORDER BY r.created_at DESC
+    `,
+      [bookId]
+    );
+  }
 }
 
 module.exports = {

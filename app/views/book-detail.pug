@@ -7,20 +7,13 @@ html(lang="en")
 
     link(
       rel="stylesheet",
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css",
-      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN",
-      crossorigin="anonymous"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
     )
 
     style.
-      :root {
-        --ink: #0f172a;
-        --slate: #334155;
-        --teal: #0ea5e9;
-      }
       body {
         background: linear-gradient(120deg, #f8fafc 0%, #eef2ff 50%, #f8fafc 100%);
-        color: var(--slate);
+        color: #334155;
       }
       .card-soft {
         border: 1px solid #e2e8f0;
@@ -31,7 +24,7 @@ html(lang="en")
         border-radius: 999px;
         padding: 6px 12px;
         background: rgba(14,165,233,0.12);
-        color: var(--teal);
+        color: #0ea5e9;
         font-weight: 600;
       }
 
@@ -44,123 +37,129 @@ html(lang="en")
           span.label-pill Details
           h1.h4.fw-bold.mb-0 #{book.title}
 
-        .d-flex.flex-wrap.gap-2
-          a.btn.btn-outline-secondary.rounded-pill(href="/dashboard") ← Back to dashboard
+          if avg && avg.total > 0
+            span.badge.bg-warning.text-dark
+              | ⭐ #{Number(avg.avgRating).toFixed(1)} / 5 (#{avg.total})
+          else
+            span.text-muted No ratings yet
+
+        .d-flex.gap-2
+          a.btn.btn-outline-secondary.rounded-pill(href="/dashboard") ← Back
           a.btn.btn-outline-primary.rounded-pill(href="/") Home
 
-          // ===== ADMIN ACTIONS =====
           if uid === 1
-            a.btn.btn-warning.rounded-pill(
-              href=`/admin/books/update/${book.id}`
-            ) ✏️ Update
-
+            a.btn.btn-warning.rounded-pill(href=`/admin/books/update/${book.id}`) ✏️ Update
             a.btn.btn-danger.rounded-pill(
               href=`/admin/books/delete/${book.id}`
-              onclick="return confirm('Are you sure you want to delete this book?')"
+              onclick="return confirm('Delete this book?')"
             ) 🗑 Delete
 
       // ===== CONTENT =====
       .row.g-4
 
-        // ===== LEFT: COVER + META + PDF =====
+        // ===== LEFT =====
         .col-lg-4
           .card.card-soft.p-3
             img.rounded.w-100.mb-3(
-              style="object-fit:cover; height:320px; border:1px solid #e2e8f0;"
-              src=book.cover_image_url || 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=400&q=80'
-              alt=`Cover of ${book.title}`
+              src=book.cover_image_url || 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f'
+              style="height:320px; object-fit:cover"
             )
 
-            .small.text-muted.mb-1 ISBN-13: #{book.isbn_13 || '—'}
-            .small.text-muted.mb-1 ISBN-10: #{book.isbn_10 || '—'}
-            .small.text-muted.mb-1 Publisher: #{book.publisher_name || '—'}
-            .small.text-muted.mb-1 Published on: #{book.publication_date_input || '—'}
-            .small.text-muted.mb-1 Language: #{book.language || '—'}
-            .small.text-muted.mb-1 Format: #{book.format || '—'}
-            .small.text-muted.mb-2 Pages: #{book.page_count || '—'}
+            .small.text-muted ISBN-13: #{book.isbn_13 || '—'}
+            .small.text-muted ISBN-10: #{book.isbn_10 || '—'}
+            .small.text-muted Publisher: #{book.publisher_name || '—'}
+            .small.text-muted Language: #{book.language || '—'}
+            .small.text-muted Format: #{book.format || '—'}
+            .small.text-muted Pages: #{book.page_count || '—'}
 
-            // ===== VIEW PDF BUTTON =====
             if book.book_upload
               a.btn.btn-primary.w-100.mt-3(
                 href=book.book_upload
                 target="_blank"
               ) 📘 View Book (PDF)
             else
-              .text-muted.mt-3.text-center No PDF available
+              p.text-muted.mt-3.text-center No PDF available
 
-        // ===== RIGHT: DETAILS =====
+        // ===== RIGHT =====
         .col-lg-8
           .card.card-soft.p-4
-            form
-              .row.g-3
-                .col-md-8
-                  label.form-label Title
-                  input.form-control(type="text", value=book.title, readonly)
 
-                .col-md-4
-                  label.form-label Subtitle
-                  input.form-control(type="text", value=book.subtitle || '', readonly)
+            // ===== DETAILS =====
+            .row.g-3
+              .col-md-6
+                label.form-label Author
+                input.form-control(readonly value=book.author_name)
 
-              .row.g-3.mt-1
-                .col-md-6
-                  label.form-label Author
-                  input.form-control(type="text", value=book.author_name, readonly)
+              .col-md-6
+                label.form-label Publisher
+                input.form-control(readonly value=book.publisher_name || "")
 
-                .col-md-6
-                  label.form-label Publisher
-                  input.form-control(type="text", value=book.publisher_name || '', readonly)
+              .col-md-6
+                label.form-label Publication Date
+                input.form-control(type="date" readonly value=book.publication_date_input || "")
 
-              .row.g-3.mt-1
-                .col-md-6
-                  label.form-label ISBN-13
-                  input.form-control(type="text", value=book.isbn_13 || '', readonly)
+              .col-md-6
+                label.form-label Cover Image
+                input.form-control(readonly value=book.cover_image_url || "")
 
-                .col-md-6
-                  label.form-label ISBN-10
-                  input.form-control(type="text", value=book.isbn_10 || '', readonly)
+            .mt-3
+              label.form-label Categories
+              .d-flex.flex-wrap.gap-2
+                each cat in categories
+                  if cat.selected
+                    span.badge.bg-light.text-dark #{cat.name}
 
-              .row.g-3.mt-1
-                .col-md-4
-                  label.form-label Language
-                  input.form-control(type="text", value=book.language || '', readonly)
+            .mt-3
+              label.form-label Description
+              textarea.form-control(rows="4" readonly)= book.description || ""
 
-                .col-md-4
-                  label.form-label Format
-                  input.form-control(type="text", value=book.format || '', readonly)
+            // ===== ADD REVIEW =====
+            if loggedIn && !hasReviewed
+              .card.card-soft.p-4.mt-4
+                h5.fw-bold.mb-3 Add Your Review
+                form(action=`/books/${book.id}/reviews` method="post")
+                  .mb-3
+                    label.form-label Rating
+                    select.form-select(name="rating" required)
+                      option(value="") Select
+                      each r in [5,4,3,2,1]
+                        option(value=r)= '⭐'.repeat(r)
+                  .mb-3
+                    label.form-label Comment
+                    textarea.form-control(name="comment" rows="3")
+                  button.btn.btn-primary(type="submit") Submit
+            else if loggedIn
+              p.text-muted.mt-4 You have already reviewed this book.
+            else
+              p.text-muted.mt-4 Login to add a review.
 
-                .col-md-4
-                  label.form-label Page Count
-                  input.form-control(type="text", value=book.page_count || '', readonly)
+            // ===== REVIEWS LIST =====
+            .card.card-soft.p-4.mt-4
+              h5.fw-bold.mb-3 Reviews
 
-              .row.g-3.mt-1
-                .col-md-6
-                  label.form-label Publication Date
-                  input.form-control(type="date", value=book.publication_date_input || '', readonly)
+              if reviews && reviews.length
+                each review in reviews
+                  .border-bottom.pb-3.mb-3
+                    .d-flex.justify-content-between
+                      strong #{review.username}
+                      span ⭐ #{review.rating}/5
 
-                .col-md-6
-                  label.form-label Cover Image URL
-                  input.form-control(type="url", value=book.cover_image_url || '', readonly)
+                    p.mb-1= review.comment
+                    small.text-muted Posted on #{review.created_at}
 
-              .mt-3
-                label.form-label Categories
-                .d-flex.flex-wrap.gap-2
-                  if categories && categories.length
-                    each cat in categories
-                      label.form-check-label.border.rounded-pill.px-3.py-1.bg-light
-                        input.form-check-input.me-2(type="checkbox", disabled, checked=!!cat.selected)
-                        | #{cat.name}
-                  else
-                    span.text-muted No categories
+                    if uid === review.user_id
+                      details.mt-2
+                        summary.text-primary Edit
+                        form(action=`/reviews/edit/${review.id}` method="post")
+                          input(type="hidden" name="book_id" value=book.id)
+                          .mb-2
+                            select.form-select.form-select-sm(name="rating" required)
+                              each r in [5,4,3,2,1]
+                                option(value=r selected=review.rating===r)= '⭐'.repeat(r)
+                          .mb-2
+                            textarea.form-control.form-control-sm(name="comment" rows="2")= review.comment
+                          button.btn.btn-sm.btn-success(type="submit") Save
+              else
+                p.text-muted No reviews yet.
 
-              .mt-3
-                label.form-label Description
-                textarea.form-control(rows="4", readonly)= book.description || ''
-
-              .mt-3.text-muted.small
-                | Created: #{book.created_at || '—'} · Updated: #{book.updated_at || '—'}
-
-    script(
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js",
-      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL",
-      crossorigin="anonymous"
-    )
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js")

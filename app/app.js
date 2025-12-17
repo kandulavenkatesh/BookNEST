@@ -192,13 +192,18 @@ app.get("/books/:id", async function(req, res) {
 
     try {
         const { book, categories } = await bookModel.getBookDetail(bookId);
-        if (!book) {
-            return res.status(404).send("Book not found");
-        }
+        const reviews = await bookModel.getReviews(bookId);
+        const avg = await bookModel.getAverageRating(bookId);
+        const hasReviewed = req.session.loggedIn
+          ? await bookModel.hasUserReviewed(bookId, req.session.uid)
+          : false;
 
         res.render("book-detail", {
-            book,
-            categories
+          book,
+          categories,
+          reviews,
+          avg,
+          hasReviewed
         });
     } catch (err) {
         console.error("Error loading book details", err);
@@ -293,7 +298,7 @@ app.get("/admin/books/update/:id", async function (req, res) {
   }
 });
 
-app.post("/admin/books/update/:id", upload.single("cover"), async function (req, res) {
+app.post("/admin/books/update/:id", upload.single("book_file"), async function (req, res) {
     if (!req.session.loggedIn || req.session.uid !== 1) {
         return res.redirect("/login");
     }
@@ -353,6 +358,61 @@ app.get("/customer-dashboard", async function (req, res) {
     res.status(500).send("Unable to load customer dashboard");
   }
 });
+
+// EDIT REVIEW (POST)
+app.post("/reviews/edit/:id", async function (req, res) {
+  if (!req.session.loggedIn) return res.redirect("/login");
+
+  try {
+    const reviewId = Number(req.params.id);
+    const { rating, comment, book_id } = req.body;
+
+    const bookModel = new Book();
+    await bookModel.updateReview(
+      reviewId,
+      req.session.uid,
+      Number(rating),
+      comment
+    );
+
+    res.redirect(`/books/${book_id}`);
+  } catch (err) {
+    console.error("Edit review error:", err);
+    res.status(500).send("Unable to edit review");
+  }
+});
+
+// ADD REVIEW
+app.post("/books/:id/reviews", async function (req, res) {
+  if (!req.session.loggedIn) return res.redirect("/login");
+
+  try {
+    const bookId = Number(req.params.id);
+    const { rating, comment } = req.body;
+
+    if (rating < 1 || rating > 5) {
+      return res.status(400).send("Invalid rating");
+    }
+
+    // prevent duplicate review
+    const hasReviewed = await bookModel.hasUserReviewed(bookId, req.session.uid);
+    if (hasReviewed) {
+      return res.redirect(`/books/${bookId}`);
+    }
+
+    await db.query(
+      "INSERT INTO reviews (book_id, user_id, rating, comment) VALUES (?, ?, ?, ?)",
+      [bookId, req.session.uid, rating, comment]
+    );
+
+    res.redirect(`/books/${bookId}`);
+  } catch (err) {
+    console.error("Add review error:", err);
+    res.status(500).send("Unable to add review");
+  }
+});
+
+
 
 
 
