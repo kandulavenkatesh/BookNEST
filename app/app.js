@@ -329,6 +329,32 @@ app.get("/admin/books/delete/:id", async function (req, res) {
 });
 
 
+// ===== CUSTOMER DASHBOARD =====
+app.get("/customer-dashboard", async function (req, res) {
+  if (!req.session.loggedIn) {
+    return res.redirect("/login");
+  }
+
+  // Admin should not use customer dashboard
+  if (req.session.uid === 1) {
+    return res.redirect("/dashboard");
+  }
+
+  try {
+    const search = req.query.search || "";
+    const categoryFilter = req.query.category ? Number(req.query.category) : null;
+
+    // reuse existing dashboard logic
+    const data = await bookModel.getDashboardData(search, categoryFilter);
+
+    res.render("customer-dashboard", data);
+  } catch (err) {
+    console.error("Customer dashboard error:", err);
+    res.status(500).send("Unable to load customer dashboard");
+  }
+});
+
+
 
 // Start server on port 3000
 app.listen(3000,function(){

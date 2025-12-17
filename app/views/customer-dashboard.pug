@@ -1,0 +1,106 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+    title Customer Dashboard - BookNEST
+
+    link(
+      rel="stylesheet",
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    )
+
+    style.
+      body {
+        background: #f8fafc;
+        font-family: 'Segoe UI', sans-serif;
+      }
+      .card-soft {
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 25px rgba(15,23,42,0.06);
+      }
+      .book-cover {
+        width: 80px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+
+  body
+    .container.py-5
+
+      // ===== HEADER =====
+      .d-flex.justify-content-between.align-items-center.mb-4
+        h1.h4.fw-bold.mb-0 📚 Explore Books
+        .d-flex.gap-2
+          a.btn.btn-outline-primary(href="/") Home
+          a.btn.btn-outline-danger(href="/logout") Logout
+
+      // ===== SEARCH + FILTER =====
+      .card.card-soft.p-3.mb-4
+        form.row.g-2(method="get", action="/customer-dashboard")
+          .col-md-6
+            input.form-control(
+              type="text"
+              name="search"
+              placeholder="Search by title, author or ISBN"
+              value=filters && filters.search || ""
+            )
+
+          .col-md-4
+            select.form-select(name="category")
+              option(value="") All categories
+              if allCategories
+                each cat in allCategories
+                  option(
+                    value=cat.id
+                    selected=filters && filters.category == cat.id
+                  )= cat.name
+
+          .col-md-2.d-grid
+            button.btn.btn-primary(type="submit") Search
+
+      // ===== BOOK LIST =====
+      .card.card-soft.p-4
+        h5.fw-bold.mb-3 Available Books
+
+        if books && books.length
+          table.table.align-middle
+            thead.text-muted
+              tr
+                th Cover
+                th Title
+                th Author
+                th Category
+                th Published
+                th.text-end Action
+
+            tbody
+              each book in books
+                tr
+                  td
+                    img.book-cover(
+                      src=book.cover_image_url || "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=200&q=80"
+                      alt=book.title
+                    )
+
+                  td
+                    strong= book.title
+                    if book.isbn_13
+                      br
+                      small.text-muted ISBN #{book.isbn_13}
+
+                  td= book.author
+                  td= book.categories || "—"
+                  td= book.publication_date || "—"
+
+                  td.text-end
+                    a.btn.btn-sm.btn-outline-primary(
+                      href=`/books/${book.id}`
+                    ) View
+        else
+          p.text-muted.mb-0 No books found. Try another search.
+
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js")
