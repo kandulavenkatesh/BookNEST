@@ -117,6 +117,7 @@ class Book {
                     b.isbn_13,
                     b.language,
                     b.page_count,
+                    b.book_upload,
                     b.format,
                     b.cover_image_url,
                     b.description,

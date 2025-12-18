@@ -18,7 +18,7 @@ app.use(express.json());
 // Body parsers
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(express.static("static"));
+// app.use(express.static("static"));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -40,7 +40,8 @@ const upload = multer({
     }
   }
 });
-
+app.use(express.static("static"));
+app.use("/uploads", express.static(path.join(__dirname, "static/uploads")));
 
 
 // Configure Pug templates
@@ -203,7 +204,8 @@ app.get("/books/:id", async function(req, res) {
           categories,
           reviews,
           avg,
-          hasReviewed
+          hasReviewed,
+          req
         });
     } catch (err) {
         console.error("Error loading book details", err);

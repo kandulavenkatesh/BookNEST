@@ -74,7 +74,7 @@ html(lang="en")
 
             if book.book_upload
               a.btn.btn-primary.w-100.mt-3(
-                href=book.book_upload
+                href=`http://localhost:3000${book.book_upload}`
                 target="_blank"
               ) 📘 View Book (PDF)
             else
